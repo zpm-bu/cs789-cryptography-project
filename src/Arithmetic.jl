@@ -140,16 +140,10 @@ function modular_inverse(a, p)
     return a⁻¹
 end
 
-# Discrete Logarithm
-# =============================================================================
-function dlog()
-    --TODO
-end
-
-# Baby Step/Giant Step
+# Discrete Log
 # =============================================================================
 """
-    baby_step_giant_step(α, β, m) Let G be a group and \<a\> a cyclical
+    baby_step_giant_step(α, β, m)
 generator for G. Then there necessarily exists some `k` such that aᵏ = β for
 any β ∈ G. This function finds `k`.
 
@@ -182,5 +176,7 @@ function baby_step_giant_step(α, β, m)
     # No log found...
     return nothing
 end
+
+dlog(base::Integer, modulus::Integer) = x -> baby_step_giant_step(base, x, modulus)
 
 end # module Arithmetic
