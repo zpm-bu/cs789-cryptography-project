@@ -1,7 +1,5 @@
 using Test
 
-include("../src/Arithmetic.jl")
-
 # The following have been verified as prime by checking against Wolfram|Alpha
 p₁₆ = Int16(26893)
 p₃₂ = Int32(1973705399)
@@ -14,6 +12,10 @@ q₆₄ = Int64(8668330227278800147)
 e₁₆ = Int16(30964)
 e₃₂ = Int32(1575944192)
 e₆₄ = Int64(8720682644193752797)
+
+# ARITHMETIC MODULE
+# =============================================================================
+include("../src/Arithmetic.jl")
 
 # Because the `fex` function is internal and type-restricted, there isn't too
 # much to test here
@@ -72,3 +74,49 @@ function test_discrete_log()
     end
 end
 test_discrete_log()
+
+# FACTORING MODULE
+# =============================================================================
+include("../src/Factoring.jl")
+
+function test_rho()
+    @testset "`rho` function tests" begin
+        @test_throws DivideError Factoring.ϱ(0)
+        @test Factoring.ϱ(1) == 1
+        @test Factoring.ϱ(-1) == 1
+
+        r = Factoring.ϱ(2 * q₁₆)
+        @test r == 2 || r == q₁₆
+    end
+end
+test_rho()
+
+function test_P()
+    @testset "`P` function tests, Pollard P-1" begin
+        @test_throws DivideError Factoring.P(0)
+        @test Factoring.P(1) == 1
+        @test_throws "not allowed" Factoring.P(-1) == -1
+
+        r = Factoring.P(2 * p₁₆)
+        @test r == 2 || r == p₁₆
+    end
+end
+test_P()
+
+function test_seive()
+    @testset "`sieve` function tests" begin
+        @test_throws BoundsError Factoring.sieve(0)
+        @test Factoring.sieve(1) == 1
+        @test_throws DomainError Factoring.sieve(-1)
+        @test Factoring.sieve(p₁₆ * 6701) == 6701
+    end
+end
+test_seive()
+
+function test_factorize()
+    @testset "`factorize` function tests" begin
+        @test 3469 in Factoring.factorize(7919 * 3469)
+        @test p₃₂ in Factoring.factorize(3709 * BigInt(p₃₂))
+    end
+end
+test_factorize()

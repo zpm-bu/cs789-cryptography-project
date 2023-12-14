@@ -32,21 +32,21 @@ function ϱ(n::BigInt)
         if branch == 1
             xₐ = gₐ(xₐ)
             yₐ = gₐ(gₐ(yₐ))
-            dₐ = Arithmetic.cgcd(abs(xₐ - yₐ), n)
+            dₐ = BigInt(Arithmetic.cgcd(abs(xₐ - yₐ), n))
             branch = -1 * branch
         else
             xₛ = gₛ(xₛ)
             yₛ = gₛ(gₛ(yₛ))
-            dₛ = Arithmetic.cgcd(abs(xₛ - yₛ), n)
+            dₛ = BigInt(Arithmetic.cgcd(abs(xₛ - yₛ), n))
             branch = -1 * branch
         end
     end
 
-    if dₐ ≠ 1
+    if dₐ != 1 && dₐ != n
         return dₐ
     end
 
-    if dₛ ≠ 1
+    if dₛ != 1 && dₛ != n
         return dₛ
     end
 
@@ -147,6 +147,7 @@ Return: `p::BigInt`, a factor of `n`.
 function get_factor(n::BigInt)
     # Start with the rho test
     pᵣ = ϱ(n)
+    println(">> ϱ is pᵣ=$pᵣ")
     if pᵣ != 1
         return pᵣ
     end
@@ -185,31 +186,12 @@ components.
 Return: `F::BigInt[]`, an Array/Vector of factors of `n`. Factors appear in `F`
 exactly as many times as in `n`. So `prod(F) == n` for any `n` in the naturals.
 """
-function factorize(n::Integer)
-    if n < typemax(Int16)
-        p = sieve(n)
-        R = n ÷ p
+function factorize(n::BigInt)
+    println(">> factoring n=$n")
+    p = get_factor(n)
 
-        if R == 1
-            return [p]
-        end
-
-        return append!(factorize(p), factorize(R))
-    end
-
-    if n < typemax(Int64)
-        p = get_factor(BigInt(n))
-        R = BigInt(n ÷ p)
-
-        if R == 1
-            return [p]
-        end
-
-        return append!(factorize(p), factorize(R))
-    end
-
-    p = BigInt(get_factor(n))
-    R = BigInt(n ÷ p)
+    println(">> first factor is p=$p")
+    R = n ÷ p
 
     if R == 1
         return [p]
@@ -217,5 +199,7 @@ function factorize(n::Integer)
 
     return append!(factorize(p), factorize(R))
 end
+
+factorize(n::Integer) = factorize(BigInt(n))
 
 end # module Factoring
