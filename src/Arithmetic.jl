@@ -67,9 +67,6 @@ function fast_exponentiation(x::Integer, e::Integer)
         if e < 0
             error("Negative exponent e=$e is not allowed in fast exponentiation")
         end
-        if m < 0
-            error("Negative modulus m=$m is not allowed in fast exponentiation")
-        end
 
         return fex(BigInt(x), BigInt(e))
 end
@@ -102,6 +99,8 @@ function cgcd(a::BigInt, b::BigInt)
     return cgcd(b, r)
 end
 
+cgcd(a::Integer, b::Integer) = cgcd(BigInt(a), BigInt(b))
+
 # Extended GCD
 # =============================================================================
 """
@@ -111,7 +110,7 @@ c₁a + c₂b = gcd(`a`, `b`). Uses cgcd instead of `Base.gcd`.
 
 Return: `(c₁::BigInt, c₂::BigInt, g::BigInt)`, where `g` = gcd(`a`, `b`).
 """
-function egcd(a, b)
+function egcd(a::BigInt, b::BigInt)
     if b == 0
         return (1, 0, a)
     end
@@ -120,6 +119,8 @@ function egcd(a, b)
     c₁, c₂, G = egcd(b, r)
     return (c₂, c₁ - (a ÷ b) * c₂, G)
 end
+
+egcd(a::Integer, b::Integer) = egcd(BigInt(a), BigInt(b))
 
 # Modular Inverse
 # =============================================================================
@@ -130,7 +131,7 @@ algorithm to find quick inversion.
 
 Return: `a⁻¹`, the mutiplicative inverse of a in the group.
 """
-function modular_inverse(a, p)
+function modular_inverse(a::BigInt, p::BigInt)
     if cgcd(a, p) != 1
         error("Cannot calculate modular inverse because a=$a and p=$p are not mutually prime.")
     end
@@ -140,40 +141,34 @@ function modular_inverse(a, p)
     return a⁻¹
 end
 
+modular_inverse(a::Integer, p::Integer) = modular_inverse(BigInt(a), BigInt(p))
+
 # Discrete Log
 # =============================================================================
 """
-    baby_step_giant_step(α, β, m)
-generator for G. Then there necessarily exists some `k` such that aᵏ = β for
-any β ∈ G. This function finds `k`.
+    baby_step_giant_step(a, b, p)
+For a group G = ℤₚ, assume that a is a generator for G. Then for any b ∈ G
+there necessarily exists some k such that aᵏ = b. This function finds `k`.
 
-Return: `k::Integer`, the power to which α needs to be raised to get β from the
+Return: `k::Integer`, the power to which a needs to be raised to get b from the
 group.
 """
-function baby_step_giant_step(α, β, m)
-    m = ceil(sqrt(n))
-    ⋆ = fexmod(n)
-    α⁻ᵐ = modular_inverse(α ⋆ m, n)
-    steps = Dict()
+function baby_step_giant_step(a, b, p)
+    m = BigInt(ceil(sqrt(p - 1)))
+    ^ᵖ = fexmod(p)
 
-    # Baby steps
-    for j ∈ 1:m-1
-        αʲ = α ⋆ j
-        steps[αʲ] = j
-    end
+    steps = Dict(a ^ᵖ i => i for i in 1:m)
 
-    # Giant steps
-    α⁽⁻ᵐ⁾ⁱ = 1
-    for i in 0:m-1
-        if haskey(steps, α⁽⁻ᵐ⁾ⁱ)
-            j = steps[α⁽⁻ᵐ⁾ⁱ]
-            return i * m + j
+    # Fermat's little theorem gives us:
+    fermat_constant = a ^ᵖ (m * (p - 2))
+
+    for j in 1:m
+        y = (b * (fermat_constant ^ᵖ j) % p)
+        if haskey(steps, y)
+            return j * m + steps[y]
         end
-
-        α⁽⁻ᵐ⁾ⁱ = (α⁽⁻ᵐ⁾ⁱ * a⁻ᵐ) % n
     end
 
-    # No log found...
     return nothing
 end
 

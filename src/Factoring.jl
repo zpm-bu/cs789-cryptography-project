@@ -67,10 +67,10 @@ Return: `1`, if no factor can be found.
 """
 function P(n::BigInt)
     a = BigInt(2)
-    ⋆ = Arithmetic.fexmod(n)
+    ^ᵖ = Arithmetic.fexmod(n)
 
     for j in 2:100
-        a = a⋆j
+        a = a ^ᵖ j
     end
 
     d = Arithmetic.cgcd(a-1, n)
@@ -182,13 +182,34 @@ end
 Using all various methods available in these modules, factor `n` into
 components.
 
-Return: `F:BigInt[]`, an Array/Vector of factors of `n`. Factors appear in `F`
-exactly as many times as in `n`. So `prod(F) == n` for any `n` in the
-naturals.
+Return: `F::BigInt[]`, an Array/Vector of factors of `n`. Factors appear in `F`
+exactly as many times as in `n`. So `prod(F) == n` for any `n` in the naturals.
 """
-function factorize(n::BigInt)
-    p = get_factor(n)
-    R = n ÷ p
+function factorize(n::Integer)
+    if n < typemax(Int16)
+        p = sieve(n)
+        R = n ÷ p
+
+        if R == 1
+            return [p]
+        end
+
+        return append!(factorize(p), factorize(R))
+    end
+
+    if n < typemax(Int64)
+        p = get_factor(BigInt(n))
+        R = BigInt(n ÷ p)
+
+        if R == 1
+            return [p]
+        end
+
+        return append!(factorize(p), factorize(R))
+    end
+
+    p = BigInt(get_factor(n))
+    R = BigInt(n ÷ p)
 
     if R == 1
         return [p]
@@ -196,7 +217,5 @@ function factorize(n::BigInt)
 
     return append!(factorize(p), factorize(R))
 end
-
-factorize(n::Integer) = factorize(BigInt(n))
 
 end # module Factoring
