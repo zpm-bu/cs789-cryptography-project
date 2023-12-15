@@ -120,3 +120,19 @@ function test_factorize()
     end
 end
 test_factorize()
+
+# PRIMALITY
+# =============================================================================
+include("../src/Primality.jl")
+
+function test_fermat()
+    @testset "`fermat_test` function tests" begin
+        # Works for primes
+        @test fermat_test(13) == true
+        @test fermat_test(17) == true
+        # Edges
+        @test_throws Error fermat_primes(0)
+        @test_throws Error fermat_primes(1)
+        @test_throws Error fermat_primes(-1)
+    end
+end

@@ -114,6 +114,7 @@ function sieve(n::BigInt)
     end
 
     # 191 is the next prime, and primes are all odd, so we can just step by 2
+    println(">> Building primes list...")
     for i in 191:2:target
         if σ[i]
             σ[2i:i:end] .= false
@@ -122,6 +123,7 @@ function sieve(n::BigInt)
 
     # Now we have a sieve, so we can filter down to just the primes...
     primes = filter(x -> σ[x], 1:target)
+    println(">> Primes list is ready.")
 
     for p in primes
         if n % p == 0
