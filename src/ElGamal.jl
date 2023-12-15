@@ -58,4 +58,27 @@ end
 decrypt(c::Integer, s::Integer, r::Integer, p::Integer) =
     decrypt(BigInt(c), BigInt(s), BigInt(r), BigInt(p))
 
+# Crack
+# =============================================================================
+"""
+    crack(cyphertext, anyones_key, p, g)
+Using a known key and the prime modulus `p`, break the encryption on the
+provided cyphertext under ElGamal.
+
+Return: `message::BigInt`, the encrypted message.
+"""
+function crack(cyphertext::BigInt, key::BigInt, p::BigInt, g::BigInt)
+    ^ᵖ = Arithmetic.fexmod(p)
+    exponent = Arithmetic.baby_step_giant_step(g, key, p)
+
+    shared_key = key ^ᵖ exponent
+    shared_key_inverse = Arithmetic.modular_inverse(shared_key)
+
+    message = cyphertext * shared_key_inverse % p
+    return message
+end
+
+crack(c::Integer, k::Integer, p::Integer, g::Integer) =
+    crack(BigInt(c), BigInt(k), BigInt(p), BigInt(g))
+
 end

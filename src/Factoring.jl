@@ -114,7 +114,6 @@ function sieve(n::BigInt)
     end
 
     # 191 is the next prime, and primes are all odd, so we can just step by 2
-    println(">> Building primes list...")
     for i in 191:2:target
         if σ[i]
             σ[2i:i:end] .= false
@@ -123,7 +122,6 @@ function sieve(n::BigInt)
 
     # Now we have a sieve, so we can filter down to just the primes...
     primes = filter(x -> σ[x], 1:target)
-    println(">> Primes list is ready.")
 
     for p in primes
         if n % p == 0
@@ -149,7 +147,6 @@ Return: `p::BigInt`, a factor of `n`.
 function get_factor(n::BigInt)
     # Start with the rho test
     pᵣ = ϱ(n)
-    println(">> ϱ is pᵣ=$pᵣ")
     if pᵣ != 1
         return pᵣ
     end
@@ -189,10 +186,8 @@ Return: `F::BigInt[]`, an Array/Vector of factors of `n`. Factors appear in `F`
 exactly as many times as in `n`. So `prod(F) == n` for any `n` in the naturals.
 """
 function factorize(n::BigInt)
-    println(">> factoring n=$n")
     p = get_factor(n)
 
-    println(">> first factor is p=$p")
     R = n ÷ p
 
     if R == 1

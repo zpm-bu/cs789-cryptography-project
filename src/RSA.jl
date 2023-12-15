@@ -57,4 +57,28 @@ end
 
 decrypt(m::Integer, r::Integer, n::Integer) = decrypt(BigInt(m), BigInt(r), BigInt(n))
 
+# Crack
+# =============================================================================
+"""
+    crack(cyphertext, basis)
+Factor the basis and use it to generate the keys encoding the message. Then,
+use the private key to break it.
+
+Return: `message::BigInt`, the encrypted message.
+"""
+function crack(cyphertext::BigInt, basis::BigInt)
+    factors = Factoring.factorize(basis)
+    p = BigInt(factors[1])
+    q = BigInt(factors[2])
+
+    n, _, d = generate_keys(p, q)
+
+    ^ⁿ = Arithmetic.fexmod(n)
+    message = cyphertext ^ⁿ d
+
+    return message
+end
+
+crack(c::Integer, p::Integer, b::Integer) = crack(BigInt(c), BigInt(p), BigInt(b))
+
 end
